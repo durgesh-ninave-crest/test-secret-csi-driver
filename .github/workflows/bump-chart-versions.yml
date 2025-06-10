@@ -107,16 +107,17 @@ jobs:
           yq e ".appVersion = \"$LAST_VERSION_TO_UPDATE\"" -i charts/secrets-store-csi-driver-provider-gcp/Chart.yaml
           yq e ".appVersion = \"$LAST_VERSION_TO_UPDATE\"" -i manifest_staging/charts/secrets-store-csi-driver-provider-gcp/Chart.yaml
 
+          git add charts/secrets-store-csi-driver-provider-gcp/Chart.yaml
+          git add manifest_staging/charts/secrets-store-csi-driver-provider-gcp/Chart.yaml
+
           # Check if there are any changes
-          if [ -n "$(git status --porcelain)" ]; then
+          if git diff --cached --exit-code; then
+            echo "No changes detected. Skipping commit."
+          else
             echo "Changes detected. Committing and pushing."
             # Stage and commit all changes in a single step
-            git add charts/secrets-store-csi-driver-provider-gcp/Chart.yaml
-            git add manifest_staging/charts/secrets-store-csi-driver-provider-gcp/Chart.yaml
             git commit -m "Update Staging Chart.yaml with version $LAST_VERSION_TO_UPDATE"
             git push
-          else
-            echo "No changes detected. Skipping commit."
           fi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -133,16 +134,17 @@ jobs:
           yq eval ".image.hash = \"$DIGEST\"" -i charts/secrets-store-csi-driver-provider-gcp/values.yaml
           yq eval ".image.hash = \"$DIGEST\"" -i manifest_staging/charts/secrets-store-csi-driver-provider-gcp/values.yaml
 
+          git add charts/secrets-store-csi-driver-provider-gcp/values.yaml
+          git add manifest_staging/charts/secrets-store-csi-driver-provider-gcp/values.yaml
+
           # Check if there are any changes
-          if [ -n "$(git status --porcelain)" ]; then
+          if git diff --cached --exit-code; then
+            echo "No changes detected. Skipping commit."
+          else
             echo "Changes detected. Committing and pushing."
             # Stage and commit all changes in a single step
-            git add charts/secrets-store-csi-driver-provider-gcp/values.yaml
-            git add manifest_staging/charts/secrets-store-csi-driver-provider-gcp/values.yaml
             git commit -m "Update manifest_staging value.yaml with DIGEST $DIGEST"
             git push
-          else
-            echo "No changes detected. Skipping commit."
           fi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

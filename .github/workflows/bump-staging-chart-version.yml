@@ -49,7 +49,7 @@ jobs:
         with:
           project_id: "gsmg4-53270"
 
-      - name: Build and push Docker image
+      - name: Build and push docker image
         run: |
           gcloud builds submit --config scripts/cloudbuild-develop-release.yaml --substitutions=_VERSION=latest,_BRANCH_NAME=main --no-source
 
@@ -90,16 +90,18 @@ jobs:
           # Use yq to update the image.hash field in values.yaml with the DIGEST value
           yq eval ".image.hash = \"$DIGEST\"" -i manifest_staging/charts/secrets-store-csi-driver-provider-gcp/values.yaml
 
+          git add manifest_staging/charts/secrets-store-csi-driver-provider-gcp/Chart.yaml
+          git add manifest_staging/charts/secrets-store-csi-driver-provider-gcp/values.yaml
+
           # Check if there are any changes
-          if [ -n "$(git status --porcelain)" ]; then
+          if git diff --cached --exit-code; then
+            echo "No changes detected. Skipping commit."
+          else
             echo "Changes detected. Committing and pushing."
             # Stage and commit all changes in a single step
-            git add manifest_staging/charts/secrets-store-csi-driver-provider-gcp/Chart.yaml
-            git add manifest_staging/charts/secrets-store-csi-driver-provider-gcp/values.yaml
+           
             git commit -m "Update Chart.yaml with version $VERSION_TO_UPDATE and values.yaml with digest $DIGEST"
             git push
-          else
-            echo "No changes detected. Skipping commit."
           fi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
