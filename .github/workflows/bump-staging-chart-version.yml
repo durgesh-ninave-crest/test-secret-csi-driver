@@ -40,7 +40,7 @@ jobs:
           git config --global user.name "GitHub Actions"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
 
-      - name: "Auth to GCP exist env"
+      - name: Auth to GCP exist env
         uses: google-github-actions/auth@v1
         with:
           credentials_json: ${{ secrets.GCP_CREDENTIALS }}
@@ -52,6 +52,10 @@ jobs:
       - name: Trigger Cloud Build
         run: |
           gcloud builds submit --config scripts/cloudbuild-develop-release.yaml --substitutions=_VERSION=latest,_BRANCH_NAME=main --no-source
+
+      - name: Pull latest changes from remote
+        run: |
+          git pull --rebase origin main
 
       - name: Extract latest image digest
         id: extract_latest_digest
@@ -93,8 +97,3 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Clean up credential files
-        run: |
-          if ls gha-creds-*.json 1> /dev/null 2>&1; then
-            rm gha-creds-*.json
-          fi

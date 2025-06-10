@@ -88,6 +88,10 @@ jobs:
           # Save the digest to an environment variable
           echo "DIGEST=$IMAGE_DIGEST" >> $GITHUB_ENV
 
+      - name: Pull latest changes from remote
+        run: |
+          git pull --rebase origin main
+
       - name: Update helm chart with latest releases
         run: |
           # Update the version in the charts/secrets-store-csi-driver-provider-gcp/Chart.yaml file
