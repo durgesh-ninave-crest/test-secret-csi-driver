@@ -34,3 +34,4 @@ steps:
           '-t', 'asia-docker.pkg.dev/gsmg4-53270/secrets-store-csi-driver-provider-gcp/plugin:latest',
           '--push',
           '.' ]  # Add the current directory as the build context
+  dir: "secrets-store-csi-driver-provider-gcp"  
