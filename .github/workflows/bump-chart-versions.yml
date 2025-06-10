@@ -70,6 +70,12 @@ jobs:
       - uses: google-github-actions/setup-gcloud@v1
         with:
           project_id: "gsmg4-53270"
+            
+      - name: Clean up credential files
+        run: |
+          if ls gha-creds-*.json 1> /dev/null 2>&1; then
+            rm gha-creds-*.json
+          fi
       
       - name: Update helm chart with latest version
         run: |
