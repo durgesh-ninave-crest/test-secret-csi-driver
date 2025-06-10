@@ -76,8 +76,25 @@ jobs:
           if ls gha-creds-*.json 1> /dev/null 2>&1; then
             rm gha-creds-*.json
           fi
-      
-      - name: Update helm chart with latest version
+
+      - name: Extract latest release image digest
+        id: extract_latest_digest
+        run: |
+          # Extract the image digest from the build process
+          IMAGE=asia-docker.pkg.dev/gsmg4-53270/secrets-store-csi-driver-provider-gcp/plugin:v${VERSION}
+          IMAGE_DIGEST=$(gcloud artifacts docker images describe "$IMAGE" --format='get(image_summary.digest)')
+
+          if [[ -z "$IMAGE_DIGEST" ]]; then
+            echo "Failed to get image digest."
+            exit 1
+          fi
+
+          echo "Extracted digest: $IMAGE_DIGEST"
+
+          # Save the digest to an environment variable
+          echo "DIGEST=$IMAGE_DIGEST" >> $GITHUB_ENV
+
+      - name: Update helm chart with latest releases
         run: |
           # Update the version in the charts/secrets-store-csi-driver-provider-gcp/Chart.yaml file
           LAST_VERSION_TO_UPDATE=$VERSION
@@ -99,24 +116,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Extract latest release image digest
-        id: extract_latest_digest
-        run: |
-          # Extract the image digest from the build process
-          IMAGE=asia-docker.pkg.dev/gsmg4-53270/secrets-store-csi-driver-provider-gcp/plugin:v${VERSION}
-          IMAGE_DIGEST=$(gcloud artifacts docker images describe "$IMAGE" --format='get(image_summary.digest)')
-
-          if [[ -z "$IMAGE_DIGEST" ]]; then
-            echo "Failed to get image digest."
-            exit 1
-          fi
-
-          echo "Extracted digest: $IMAGE_DIGEST"
-
-          # Save the digest to an environment variable
-          echo "DIGEST=$IMAGE_DIGEST" >> $GITHUB_ENV
-        
-      - name: Update Helm Chart with New Image digest value
+      - name: Update Helm Chart with Image Digest
         run: |
           # Ensure the DIGEST environment variable is set
           if [ -z "$DIGEST" ]; then

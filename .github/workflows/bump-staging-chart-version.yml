@@ -76,23 +76,13 @@ jobs:
           # Save the digest to an environment variable
           echo "DIGEST=$IMAGE_DIGEST" >> $GITHUB_ENV
 
-      - name: Update staging helm chart with latest version
+      - name: Update staging helm chart with latest version and image digest
         run: |
           # Update the version in the manifest_staging/charts/secrets-store-csi-driver-provider-gcp/Chart.yaml file
-          VERSION_TO_UPDATE=$VERSION
-
+          VERSION_TO_UPDATE=${{ env.VERSION }}
           echo "Updating manifest_staging/charts/secrets-store-csi-driver-provider-gcp/Chart.yaml with version $VERSION_TO_UPDATE"
-
           yq e ".appVersion = \"$VERSION_TO_UPDATE\"" -i manifest_staging/charts/secrets-store-csi-driver-provider-gcp/Chart.yaml
 
-          git add manifest_staging/charts/secrets-store-csi-driver-provider-gcp/Chart.yaml
-          git commit -m "Update Chart.yaml with version $VERSION_TO_UPDATE"
-          git push
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Update Staging Helm Chart with Latest Release Image digest value
-        run: |
           # Ensure the DIGEST environment variable is set
           if [ -z "$DIGEST" ]; then
             echo "DIGEST environment variable is not set"
@@ -102,8 +92,9 @@ jobs:
           # Use yq to update the image.hash field in values.yaml with the DIGEST value
           yq eval ".image.hash = \"$DIGEST\"" -i manifest_staging/charts/secrets-store-csi-driver-provider-gcp/values.yaml
 
-          git add manifest_staging/charts/secrets-store-csi-driver-provider-gcp/values.yaml
-          git commit -m "Update Chart.yaml with DIGEST $DIGEST"
+          # Stage and commit all changes in a single step
+          git add manifest_staging/charts/secrets-store-csi-driver-provider-gcp/Chart.yaml manifest_staging/charts/secrets-store-csi-driver-provider-gcp/values.yaml
+          git commit -m "Update Chart.yaml with version $VERSION_TO_UPDATE and values.yaml with digest $DIGEST"
           git push
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
