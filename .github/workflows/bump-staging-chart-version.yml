@@ -51,13 +51,7 @@ jobs:
 
       - name: Trigger Cloud Build
         run: |
-          gcloud builds submit --config scripts/cloudbuild-develop-release.yaml --no-source
-      
-      - name: Clean up credential files
-        run: |
-          if ls gha-creds-*.json 1> /dev/null 2>&1; then
-            rm gha-creds-*.json
-          fi
+          gcloud builds submit --config scripts/cloudbuild-develop-release.yaml --substitutions=_VERSION=latest,_BRANCH_NAME=main --no-source
 
       - name: Extract latest image digest
         id: extract_latest_digest
@@ -98,3 +92,9 @@ jobs:
           git push
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Clean up credential files
+        run: |
+          if ls gha-creds-*.json 1> /dev/null 2>&1; then
+            rm gha-creds-*.json
+          fi

@@ -23,14 +23,14 @@ options:
   machineType: N1_HIGHCPU_8
 steps:
 - name: 'gcr.io/cloud-builders/git'
-  args: ['clone', '--depth', '1', '--branch', 'main', 'https://github.com/durgesh-ninave-crest/test-secret-csi-driver']
+  args: ['clone', '--depth', '1', '--branch', '$_BRANCH_NAME', 'https://github.com/durgesh-ninave-crest/test-secret-csi-driver']
 - name: 'gcr.io/cloud-builders/docker'
   args: ['buildx', 'create', '--use']
 - name: 'gcr.io/cloud-builders/docker'
   args: [ 'buildx', 'build',
           '--platform=linux/amd64,linux/arm64',
           '--build-arg',
-          'VERSION=latest',
-          '-t', 'asia-docker.pkg.dev/gsmg4-53270/secrets-store-csi-driver-provider-gcp/plugin:latest',
+          'VERSION=$_VERSION',
+          '-t', 'asia-docker.pkg.dev/gsmg4-53270/secrets-store-csi-driver-provider-gcp/plugin:$_VERSION',
           '--push',
           'test-secret-csi-driver' ]
