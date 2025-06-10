@@ -1,3 +1,3 @@
 # test-secret-csi-driver
 
-release 1.1
+final release 1.1
