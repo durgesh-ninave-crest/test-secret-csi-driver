@@ -97,3 +97,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Clean up credential files
+        run: |
+          if ls gha-creds-*.json 1> /dev/null 2>&1; then
+            rm gha-creds-*.json
+          fi
